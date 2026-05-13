@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>USB-TRACE | Forensic History</title>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; }
+        .nav { margin-bottom: 30px; text-align: center; }
+        .nav a { color: #58a6ff; text-decoration: none; margin: 0 15px; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 { color: #d2a8ff; text-align: center; }
+        .search-box { width: 100%; padding: 12px; margin-bottom: 20px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; background: #161b22; border-radius: 8px; overflow: hidden; border: 1px solid #30363d; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #30363d; }
+        th { background-color: #21262d; color: #8b949e; }
+        tr:hover { background-color: #1c2128; }
+        .severity-Critical { color: #ff7b72; font-weight: bold; }
+        .severity-High { color: #ffa657; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">← Live Dashboard</a>
+        </div>
+        <h1>🕵️ Forensic Threat Archive</h1>
+        <input type="text" id="searchInput" class="search-box" placeholder="Search by Device, Tactic, or Intent...">
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Device Path</th>
+                    <th>Severity</th>
+                    <th>MITRE Tactic</th>
+                    <th>Full Intent Analysis</th>
+                </tr>
+            </thead>
+            <tbody id="history-body">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadHistory() {
+            fetch('/api/threats')
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById('history-body');
+                    tbody.innerHTML = data.map(t => `
+                        <tr>
+                            <td style="color:#8b949e">${t.timestamp}</td>
+                            <td><code>${t.device}</code></td>
+                            <td class="severity-${t.severity}">${t.severity}</td>
+                            <td><span style="background:#30363d; padding:2px 5px; border-radius:4px">${t.mitre}</span></td>
+                            <td>${t.intent}</td>
+                        </tr>
+                    `).join('');
+                });
+        }
+
+        // خاصية البحث الفوري
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toUpperCase();
+            let rows = document.querySelector("#history-body").rows;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].style.display = rows[i].innerText.toUpperCase().includes(filter) ? "" : "none";
+            }
+        });
+
+        loadHistory();
+    </script>
+</body>
+</html>

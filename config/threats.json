@@ -1,0 +1,96 @@
+[
+  {
+    "name": "Hak5 Bash Bunny",
+    "vid": "0951",
+    "pid": "1642",
+    "score": 100,
+    "device_class": "Composite (HID + Mass Storage + RNDIS/Ethernet)",
+    "mitre_attack_id": ["T1200", "T1059", "T1562.004"],
+    "attack_type": "Multi-Vector Payload Injection & Network Spoofing",
+    "description": "An advanced SoC-based attack platform capable of simultaneously emulating a gigabit Ethernet adapter, mass storage, and a high-speed keyboard. It specializes in bypassing firewalls via rogue RNDIS networking and extracting credentials.",
+    "ioc_indicators": "Sudden enumeration of a new RNDIS/Ethernet interface followed by anomalous SMB or HTTP traffic to a link-local IP (e.g., 172.16.64.1).",
+    "mitigation_actions": [
+      "Network Rule: Disable auto-configuration of new RNDIS/Ethernet-over-USB network interfaces.",
+      "Hardware Rule: Block composite USB devices that enumerate both HID and Networking classes simultaneously.",
+      "Behavioral: Monitor for rapid sequential execution of PowerShell or CMD binaries."
+    ]
+  },
+  {
+    "name": "Hak5 O.MG Cable",
+    "vid": "05ac",
+    "pid": "021e",
+    "score": 95,
+    "device_class": "Covert HID Emulation (Spoofed Apple Cable)",
+    "mitre_attack_id": ["T1200", "T1105", "T1056.001"],
+    "attack_type": "Air-Gapped Keystroke Injection & Wi-Fi C2",
+    "description": "A highly covert malicious implant concealed within a standard USB charging cable. It establishes a hidden Wi-Fi access point (C2 channel) allowing remote attackers to trigger delayed keystroke payloads and exfiltrate data.",
+    "ioc_indicators": "Presence of an Apple keyboard VID/PID (05ac:021e) when no physical Apple keyboard is attached. Abnormal power consumption for a passive charging cable.",
+    "mitigation_actions": [
+      "Physical Security: Implement strict clean-desk policies and ban BYOD (Bring Your Own Device) cables.",
+      "Hardware Rule: Alert on generic Apple/Logitech VIDs that draw power exceeding standard HID limits.",
+      "Network/RF Rule: Monitor the physical environment for unauthorized rogue Wi-Fi APs (O.MG default SSIDs)."
+    ]
+  },
+  {
+    "name": "Hak5 Rubber Ducky",
+    "vid": "1b1c",
+    "pid": "1b00",
+    "score": 90,
+    "device_class": "High-Speed HID Emulator",
+    "mitre_attack_id": ["T1200", "T1059.001", "T1059.003"],
+    "attack_type": "Automated Keystroke Injection (DuckyScript)",
+    "description": "The quintessential keystroke injection tool. It emulates a generic USB keyboard to blindly inject pre-compiled payloads (DuckyScript) at speeds far exceeding human capabilities, executing code before the OS can mount defenses.",
+    "ioc_indicators": "Keystroke event delta (time between key presses) consistently falling below 50ms with zero variance (robotic precision).",
+    "mitigation_actions": [
+      "Behavioral: Enforce strict keystroke dynamic analysis (speed and variance checks).",
+      "OS Rule: Require active user interaction (e.g., Ctrl+Alt+Del) before executing auto-run prompts.",
+      "Endpoint Rule: Blacklist known default Ducky VIDs if observed outside expected peripheral lists."
+    ]
+  },
+  {
+    "name": "Digispark (V-USB BadUSB)",
+    "vid": "16d0",
+    "pid": "0753",
+    "score": 80,
+    "device_class": "Attiny85 Microcontroller (Software USB)",
+    "mitre_attack_id": ["T1200", "T1059"],
+    "attack_type": "Budget HID Payload Delivery",
+    "description": "A low-cost, Arduino-compatible development board utilizing software-based USB emulation (V-USB). Frequently weaponized by script kiddies for rapid deployment of reverse shells or ransomware downloaders.",
+    "ioc_indicators": "Device enumeration logs showing 'Digispark' or the specific V-USB VID 16d0, coupled with short connection lifespans.",
+    "mitigation_actions": [
+      "Hardware Rule: Immediately block VID 16d0:0753, as it is strictly a development board and has no legitimate enterprise use case.",
+      "Behavioral: Alert on devices that disconnect immediately after less than 10 seconds of connection time."
+    ]
+  },
+  {
+    "name": "Teensy LC (Weaponized)",
+    "vid": "16c0",
+    "pid": "0477",
+    "score": 85,
+    "device_class": "Programmable HID/Serial Microcontroller",
+    "mitre_attack_id": ["T1200", "T1059"],
+    "attack_type": "Custom Keystroke & Serial Attacks",
+    "description": "A versatile microcontroller capable of emulating keyboards, mice, and serial ports simultaneously. Often used in targeted physical penetration tests due to its larger memory capacity for complex, multi-stage payloads.",
+    "ioc_indicators": "Multiple input interfaces (Mouse, Keyboard, Serial) registering simultaneously under the PJRC/Teensy VID (16c0).",
+    "mitigation_actions": [
+      "Hardware Rule: Restrict devices presenting as generic HID from loading serial port (COM) drivers simultaneously.",
+      "Behavioral: Correlate simultaneous mouse movement and rapid keyboard typing originating from the same physical port."
+    ]
+  },
+  {
+    "name": "Inverse Path USB Armory",
+    "vid": "1d6b",
+    "pid": "0104",
+    "score": 95,
+    "device_class": "Secure Boot SoC / Network Adapter",
+    "mitre_attack_id": ["T1200", "T1040", "T1557"],
+    "attack_type": "Network Interception & Rogue DNS",
+    "description": "A full-featured computer in a USB stick form factor. While designed for secure applications, it can be weaponized as a malicious network adapter to intercept local traffic, steal hashed credentials (Responder), or poison DNS caches.",
+    "ioc_indicators": "Appearance of the Linux Foundation VID (1d6b) registering as a Communications and CDC Control network interface.",
+    "mitigation_actions": [
+      "Network Rule: Deny network bridging or sharing from internal Wi-Fi/Ethernet to USB-based network adapters.",
+      "Protocol Rule: Deploy NTLM relay mitigations (SMB Signing) to render stolen hashes useless.",
+      "Endpoint Rule: Alert on any unexpected changes to the host's default gateway or DNS routing table post-USB insertion."
+    ]
+  }
+]

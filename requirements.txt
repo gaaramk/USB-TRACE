@@ -1,0 +1,12 @@
+pandas
+regipy
+python-evtx
+LnkParse3
+Flask
+Jinja2
+weasyprint
+tabulate
+evdev
+google-generativeai
+requests
+

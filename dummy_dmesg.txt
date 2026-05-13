@@ -1,0 +1,5 @@
+﻿[ 1234.5678] usb 1-1: New USB device found, idVendor=0781, idProduct=5581
+[ 1236.5678] usb 1-1: USB disconnect, device number 2
+[ 34500.123456] input: USB Keyboard as /devices/virtual/input/input99
+
+

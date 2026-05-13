@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB-TRACE | SOC Dashboard</title>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 20px; }
+        h1 { color: #58a6ff; text-align: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .card { background-color: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 20px; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }
+        th { color: #8b949e; font-weight: normal; text-transform: uppercase; font-size: 13px;}
+        .threat-icon { color: #f85149; font-weight: bold; }
+        .status-badge { background-color: rgba(248, 81, 73, 0.1); color: #f85149; padding: 3px 8px; border-radius: 12px; border: 1px solid #f85149; font-size: 12px; }
+        .mitre-badge { background-color: #30363d; padding: 3px 6px; border-radius: 4px; font-size: 12px; color: #c9d1d9; border: 1px solid #484f58; }
+        .unblock-btn { background-color: #238636; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 12px; transition: 0.2s;}
+        .unblock-btn:hover { background-color: #2ea043; }
+        .intent-col { font-size:13px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ USB-TRACE Command Center</h1>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="/history" style="color: #58a6ff; text-decoration: none; font-size: 14px;">📂 View Forensic Archive</a>
+        </div>
+        
+        <div class="card" style="border-left: 4px solid #d2a8ff;">
+            <h2 style="color: #d2a8ff; margin-top: 0;">📡 Live Threat Feed (AI Analyzed)</h2>
+            <p style="color: #8b949e; font-size: 14px;">Real-time feed of intercepted attacks analyzed by Gemini AI.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Target Path</th>
+                        <th>Severity</th>
+                        <th>MITRE Tactic</th>
+                        <th>Malicious Intent</th>
+                    </tr>
+                </thead>
+                <tbody id="threat-list">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #f85149;">
+            <h2 style="color: #ff7b72; margin-top: 0;">🚫 Active UDEV Blacklist (Kernel Level)</h2>
+            <p style="color: #8b949e; font-size: 14px;">Devices currently blocked by Active Defense.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vendor ID (VID)</th>
+                        <th>Product ID (PID)</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="blocked-list">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // دالة جلب الأجهزة المحظورة (كما هي)
+        function fetchBlockedDevices() {
+            fetch('/api/blocked')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('blocked-list');
+                    tbody.innerHTML = ''; 
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#3fb950; padding: 20px;">✅ No devices are currently blocked. System is clean.</td></tr>';
+                        return;
+                    }
+                    data.forEach(device => {
+                        const row = `<tr>
+                            <td class="threat-icon">${device.vid}</td>
+                            <td class="threat-icon">${device.pid}</td>
+                            <td><span class="status-badge">${device.status}</span></td>
+                            <td><button class="unblock-btn" onclick="unblockDevice('${device.vid}', '${device.pid}')">🔓 Unblock</button></td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                }).catch(err => console.error(err));
+        }
+
+        // دالة جلب الهجمات החية (الجديدة)
+        function fetchThreats() {
+            fetch('/api/threats')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('threat-list');
+                    tbody.innerHTML = '';
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8b949e; padding: 20px;">No threats detected yet. Monitoring is active...</td></tr>';
+                        return;
+                    }
+                    data.forEach(threat => {
+                        let sevColor = threat.severity === 'Critical' ? '#ff7b72' : (threat.severity === 'High' ? '#ffa657' : '#e3b341');
+                        const row = `<tr>
+                            <td style="color:#8b949e; font-size:12px;">${threat.timestamp}</td>
+                            <td style="font-family: monospace;">${threat.device}</td>
+                            <td style="color:${sevColor}; font-weight:bold;">${threat.severity}</td>
+                            <td><span class="mitre-badge">${threat.mitre}</span></td>
+                            <td class="intent-col" title="${threat.intent}">${threat.intent}</td>
+                        </tr>`;
+                        tbody.innerHTML += row;
+                    });
+                }).catch(err => console.error(err));
+        }
+
+        function unblockDevice(vid, pid) {
+            if(!confirm(`Are you sure you want to Unblock device [${vid}:${pid}]?`)) return;
+            fetch(`/api/unblock/${vid}/${pid}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') fetchBlockedDevices();
+                else alert('Error: ' + data.message);
+            });
+        }
+
+        // تشغيل كل الدوال للتحديث المستمر
+        fetchBlockedDevices();
+        fetchThreats();
+        setInterval(() => { fetchBlockedDevices(); fetchThreats(); }, 2000);
+    </script>
+</body>
+</html>

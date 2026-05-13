@@ -54,3 +54,4 @@ sudo ./venv/bin/python app.py
 Developed by Mohamed Kamal El-dein | Built for Advanced Hardware Forensics
 # USB-TRACE.
 # USB-TRACE.
+# USB-TRACE.

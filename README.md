@@ -1,32 +1,3 @@
-# 🛡️ USB-TRACE: Advanced Hardware & Behavioral Analyzer
-**An Enterprise-Grade Endpoint Detection & Response (EDR) system designed to detect, mitigate, and report malicious USB threats (BadUSB/Rubber Ducky) using triple-layered intelligence.**
-
----
-
-## 🎯 Architecture & Core Mechanisms
-USB-TRACE operates beyond traditional signature-based detection. It utilizes a **Triple-Dimensional Radar** to identify sophisticated physical attacks:
-
-1.  **🧠 Behavioral Typing DNA (Speed Radar):** Hooks into `/dev/input/` events to calculate the microsecond delta ($\Delta t$) between keystrokes. It instantly flags robotic typing patterns (e.g., $< 50ms$ variance) characteristic of DuckyScript payloads.
-2.  **🔌 Hardware Power Fingerprinting:** Parses `sysfs` descriptors to uncover electrical anomalies. A device claiming to be a generic keyboard but drawing suspiciously high power ($> 100mA$) is flagged as a potential SoC-based implant.
-3.  **🦠 Threat Intelligence Database:** Cross-references dynamic VID/PID pairs against a customized JSON database of known offensive security tools (e.g., Hak5 Bash Bunny, O.MG Cable), linking them to specific **MITRE ATT&CK** techniques.
-
----
-
-## ⚡ Active Defense (Terminator Mode)
-USB-TRACE is not just a monitoring tool; it is an active defense weapon. Upon evaluating a device as `High-Risk` via the central `RiskEngine`, it triggers the **Terminator Protocol**:
-*   Interfaces directly with the Linux Kernel (`/sys/bus/usb/devices/`).
-*   Executes an immediate `Unbind/Deauthorize` command.
-*   **Result:** The port is electronically disabled within milliseconds, physically choking the malicious payload before execution completes.
-
----
-
-## 📲 Cloud SOC Alerting & Forensic Reporting
-To simulate a real-world enterprise environment, USB-TRACE features comprehensive incident response capabilities:
-*   **Telegram Bot Integration:** Dispatches real-time, Markdown-formatted security alerts to a centralized SOC dashboard via the Telegram API, detailing threat classification and IOCs.
-*   **Automated Forensics:** Generates immutable, timestamped reports in both **HTML** and **PDF** formats, preserving the chain of custody for post-incident analysis.
-
-
-
 # 🛡️ USB-TRACE: AI-Powered Unified EDR System
 
 **USB-TRACE** is an advanced, Enterprise-Grade Endpoint Detection and Response (EDR) system specifically engineered for Linux environments. It provides deep kernel-level monitoring, dynamic honeypots, and AI-driven forensic analysis to defend against rogue hardware and malicious USB peripherals.
